@@ -1,0 +1,8 @@
+{
+    "bot":{
+        "token":"MjY0MDAzNjA3MDE4NDcxNDI0.C0aQDA.1t99yfnzR6zSAbNq_zEivEdnl_I"
+    },
+    "commands":{
+        "commandPrefix":"/"
+    }
+}
