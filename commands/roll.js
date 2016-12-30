@@ -1,6 +1,6 @@
 var Cmd = require('./cmd.js');
 var Main = require('../app.js');
-var Utils = require(../utils.js);
+var Utils = require('../utils.js');
 var EXPORT = module.exports;
 
 //TODO: if someone could update this to run DND notation instead that'd be great.
@@ -8,18 +8,19 @@ var EXPORT = module.exports;
 EXPORT.init = function(){
     var command = new Cmd.Command;
 
-    command.help = "Pong!";
-    command.name = "ping";
+    command.help = "roll <max> | Rolls a number between 1 and <max>";
+    command.name = "roll";
     command.entry = function(order){
         message = "";
+        console.log(order.args[0])
         if(Utils.IsNumeric(order.args[0])){
-
+            message = "Rolled: " + Math.ceil(Math.random() * order.args[0]);
         } else{
-            message = "Argument non numeric, Use a number!"
+            message = "Argument non numeric, Use a number!";
         }
         Main.bot.sendMessage({
             to: order.channelID,
-            message: message;
+            message: message
         })
     }
     Cmd.COMMAND_LIST.push(command);

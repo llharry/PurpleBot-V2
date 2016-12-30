@@ -8,7 +8,7 @@ var EXPORT = module.exports;
 
 
 Cmd.loadCommandFile('./ping.js');
-
+Cmd.loadCommandFile('./roll.js');
 
 
 

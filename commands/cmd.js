@@ -42,7 +42,8 @@ EXPORT.Order = function(){
     this.splitOrderArgs = function(message){
         var tmp = message.substring(1).split(" "); //Remove first char and split around spaces.
         this.cmd = tmp[0];
-        this.args = tmp.splice(0,1);
+        tmp.shift()
+        this.args = tmp
     }
 }
 EXPORT.loadCommandFile = function(filePathFromCommands){
