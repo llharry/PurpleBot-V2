@@ -1,6 +1,8 @@
 var Cmd = require('./cmd.js');
 var Main = require('../app.js');
 var Filesystem = require('fs');
+var Config = require('../config.json');
+
 var EXPORT = module.exports;
 
 //THIS CODE IS A FUCKING MESS. CLEAN IT
@@ -84,7 +86,6 @@ function loadQuestions(){
 
 function getRandomQuestion(askerID){
     loadQuestions();
-    console.log('Getting random up in here..')
     var culledList = []
     //Cull the list, removing questions the asker has answered
     for(var key in QUESTION_LIST){
@@ -93,10 +94,6 @@ function getRandomQuestion(askerID){
         var previouslyAsked = false;
         for(var ansKey in q.answers){
             var a = q.answers[ansKey];
-            console.log('#####')
-            console.log(q.id)
-            console.log(a.order.userID)
-            console.log(askerID)
 
             if(a.order.userID === askerID){
                 console.log('ASSKED')
@@ -123,21 +120,23 @@ EXPORT.init = function(){
 
     var wq = new Cmd.Command;
 
-    wq.help = "Get asked a weird question, which you may answers with /answq [your answer]. Use /askwq [your question] to add a question to the list.";
+    wq.help = "/wq | Get asked a weird question, which you may answers with /answq [your answer]. Use /askwq [your question] to add a question to the list.";
     wq.name = "wq";
     wq.entry = function(order){
-        q = getRandomQuestion(order.userID);
-        if(!q){
+        if(order.channelID === Config.commands.weirdQuestions.channel){
+            q = getRandomQuestion(order.userID);
+            if(!q){
+                Main.bot.sendMessage({
+                    to: order.channelID,
+                    message: "You've answered all the questions! Feel free to submit some with /askwq [question]"
+                })
+                return false;
+            }
             Main.bot.sendMessage({
                 to: order.channelID,
-                message: "You've answered all the questions! Feel free to submit some with /askwq [question]"
+                message: "Quesiton ID: " + q.id + "\n Question: " + q.question
             })
-            return false;
         }
-        Main.bot.sendMessage({
-            to: order.channelID,
-            message: "Quesiton ID: " + q.id + "\n Question: " + q.question
-        })
     }
     Cmd.COMMAND_LIST.push(wq);
 
@@ -146,7 +145,7 @@ EXPORT.init = function(){
 
     var askwq = new Cmd.Command;
 
-    askwq.help = "Ask a weird question. It will have to be approved before being added to the list.";
+    askwq.help = "/askwq [id] [question] | Ask a weird question. It will have to be approved before being added to the list.";
     askwq.name = "askwq";
     askwq.entry = function(order){
         question = "";
@@ -154,19 +153,26 @@ EXPORT.init = function(){
             question = question + order.args[key] + " ";
 
         }
+        if(!(question === "")){
+            var Q = new Question()
+            Q.order = order;
+            Q.question = question;
+            Q.id = '' + order.userID + '-' + Date.now()
 
-        var Q = new Question()
-        Q.order = order;
-        Q.question = question;
-        Q.id = '' + order.userID + '-' + Date.now() + '-' + order.user;
+            saveUnapproved(Q, Q.id);
 
-        saveUnapproved(Q, Q.id);
-
-        console.log('Pending WQ: ' + question)
-        Main.bot.sendMessage({
-            to: order.channelID,
-            message: "Question pending with id: " + Q.id
-        })
+            console.log('Pending WQ: ' + question)
+            Main.bot.sendMessage({
+                to: order.channelID,
+                message: "Question pending with id: " + Q.id
+            })
+            return;
+        } else{
+            Main.bot.sendMessage({
+                to: order.channelID,
+                message: "Use '/help askwq' for more information."
+            })
+        }
     }
     Cmd.COMMAND_LIST.push(askwq);
 
